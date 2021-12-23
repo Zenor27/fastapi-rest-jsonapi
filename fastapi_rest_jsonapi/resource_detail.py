@@ -12,6 +12,8 @@ class ResourceDetail(Resource):
     @staticmethod
     def get(cls: Resource, parameters: Optional[BaseModel] = None):
         object = cls.data_layer.get_one(parameters.id)
+        if object is None:
+            return Response(status_code=status.HTTP_404_NOT_FOUND)
         return JSONResponse(content=cls.schema().dump(obj=object, many=False))
 
     @staticmethod
