@@ -8,17 +8,26 @@ class SQLAlchemyDataLayer(DataLayer):
         self.model = model
 
     def get(self) -> list:
-        values = self.session.query(self.model).all()
-        return values
+        objs = self.session.query(self.model).all()
+        return objs
 
     def get_one(self, id: int) -> object:
-        value = self.session.query(self.model).get(id)
-        return value
+        obj = self.session.query(self.model).get(id)
+        return obj
 
     def delete_one(self, id: int) -> bool:
-        value = self.get_one(id)
-        if value is None:
+        obj = self.get_one(id)
+        if obj is None:
             return False
-        self.session.delete(value)
+        self.session.delete(obj)
         self.session.commit()
         return True
+
+    def update_one(self, id: int, **kwargs) -> object:
+        obj = self.get_one(id)
+        if obj is None:
+            return None
+        for key, value in kwargs.items():
+            setattr(obj, key, value)
+        self.session.commit()
+        return obj

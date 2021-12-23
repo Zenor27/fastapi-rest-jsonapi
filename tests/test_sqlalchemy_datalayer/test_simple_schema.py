@@ -60,3 +60,8 @@ def test_simple_delete_multiple_users(client: TestClient, users):
 def test_simple_delete_multiple_users_object_not_found(client: TestClient, users):
     response: Response = client.delete(f"/users/999")
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_simple_update(client: TestClient, user):
+    response: Response = client.patch(f"/users/{user.id}", json={"name": "New user name", "age": 24})
+    assert response.status_code == status.HTTP_204_NO_CONTENT

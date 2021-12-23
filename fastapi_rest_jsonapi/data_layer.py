@@ -13,3 +13,7 @@ class DataLayer(metaclass=ABCMeta):
     @abstractmethod
     def delete_one(self, id: int) -> bool:
         raise NotImplementedError
+
+    @abstractmethod
+    def update_one(self, id: int, **kwargs) -> object:
+        raise NotImplementedError
