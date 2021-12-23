@@ -5,6 +5,7 @@ black==21.12b0
 certifi==2021.10.8
 charset-normalizer==2.0.9
 click==8.0.3
+coverage==6.2
 fastapi==0.70.1
 greenlet==1.1.2
 h11==0.12.0
@@ -21,6 +22,7 @@ py==1.11.0
 pydantic==1.8.2
 pyparsing==3.0.6
 pytest==6.2.5
+pytest-cov==3.0.0
 requests==2.26.0
 sniffio==1.2.0
 SQLAlchemy==1.4.28
