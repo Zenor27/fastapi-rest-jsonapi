@@ -1,10 +1,10 @@
+from logging import Logger, getLogger
 from typing import List
 from pydantic import BaseModel, create_model
 from fastapi import Depends
 from fastapi.applications import FastAPI
 from fastapi_rest_jsonapi.methods import Methods
 from fastapi_rest_jsonapi.resource import Resource
-from fastapi_rest_jsonapi.resource_detail import ResourceDetail
 from fastapi_rest_jsonapi import fields
 from fastapi_rest_jsonapi.utils import is_detail_resource
 
@@ -22,8 +22,12 @@ class SchemaAPI:
         fields.String: str,
     }
 
-    def __init__(self, app: FastAPI):
+    def __init__(self, app: FastAPI, logger: Logger = None):
         self.app: FastAPI = app
+        if logger is None:
+            self.logger = getLogger("uvicorn.error")
+        else:
+            self.logger = logger
 
     def __get_method(self, resource: Resource, method: str):
         return SchemaAPI.METHODS_TO_RESOURCE_FUNCTION[method](resource)
@@ -63,3 +67,4 @@ class SchemaAPI:
                 summary=self.__get_endpoint_summary(resource, method),
                 response_model=response_model if is_detail_resource(resource) else List[response_model],
             )(self.endpoint_wrapper(resource, method))
+            self.logger.info(f"✅ Registered {method} {path}")
