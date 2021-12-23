@@ -14,3 +14,11 @@ class SQLAlchemyDataLayer(DataLayer):
     def get_one(self, id: int) -> object:
         value = self.session.query(self.model).get(id)
         return value
+
+    def delete_one(self, id: int) -> bool:
+        value = self.get_one(id)
+        if value is None:
+            return False
+        self.session.delete(value)
+        self.session.commit()
+        return True

@@ -60,11 +60,14 @@ class SchemaAPI:
 
     def register(self, resource: Resource, path: str):
         for method in resource.methods:
-            response_model = self.__get_response_model(resource, method)
+            response_model = None
+            if method != Methods.DELETE.value:
+                response_model = self.__get_response_model(resource, method)
+                response_model = response_model if is_detail_resource(resource) else List[response_model]
             self.app.api_route(
                 path,
                 methods=[method],
                 summary=self.__get_endpoint_summary(resource, method),
-                response_model=response_model if is_detail_resource(resource) else List[response_model],
+                response_model=response_model,
             )(self.endpoint_wrapper(resource, method))
             self.logger.info(f"✅ Registered {method} {path}")
