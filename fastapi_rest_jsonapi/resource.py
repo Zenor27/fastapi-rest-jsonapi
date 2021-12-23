@@ -1,29 +1,31 @@
+from __future__ import annotations
+from typing import Optional, TypeVar
+from abc import ABCMeta, abstractstaticmethod
+
+from pydantic.main import BaseModel
 from fastapi_rest_jsonapi.methods import Methods
-from typing import Optional
 from fastapi_rest_jsonapi.schema import Schema
+from fastapi_rest_jsonapi.data_layer import DataLayer
 
 
-class Resource:
+class Resource(metaclass=ABCMeta):
     methods = Methods.values()
     schema: Schema = None
-    data_layer = None
+    data_layer: DataLayer = None
+    __view_parameters__: dict[str, type] = {}
 
-    @staticmethod
-    def get(cls, q: Optional[str] = None):
+    @abstractstaticmethod
+    def get(cls: Resource, parameters: Optional[BaseModel] = None):
         raise NotImplementedError
 
-    @staticmethod
-    def post(cls, q: Optional[str] = None):
+    @abstractstaticmethod
+    def post(cls: Resource, parameters: Optional[BaseModel] = None):
         raise NotImplementedError
 
-    @staticmethod
-    def put(cls, q: Optional[str] = None):
+    @abstractstaticmethod
+    def delete(cls: Resource, parameters: Optional[BaseModel] = None):
         raise NotImplementedError
 
-    @staticmethod
-    def delete(cls, q: Optional[str] = None):
-        raise NotImplementedError
-
-    @staticmethod
-    def patch(cls, q: Optional[str] = None):
+    @abstractstaticmethod
+    def patch(cls: Resource, parameters: Optional[BaseModel] = None):
         raise NotImplementedError

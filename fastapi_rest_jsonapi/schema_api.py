@@ -1,18 +1,18 @@
-from inspect import Signature, Parameter
+from typing import List
 from pydantic import BaseModel, create_model
-from typing import Optional, Union
+from fastapi import Depends
 from fastapi.applications import FastAPI
 from fastapi_rest_jsonapi.methods import Methods
-from fastapi_rest_jsonapi.resource_list import ResourceList
-from fastapi_rest_jsonapi.schema import Schema
+from fastapi_rest_jsonapi.resource import Resource
+from fastapi_rest_jsonapi.resource_detail import ResourceDetail
 from fastapi_rest_jsonapi import fields
+from fastapi_rest_jsonapi.utils import is_detail_resource
 
 
 class SchemaAPI:
     METHODS_TO_RESOURCE_FUNCTION = {
         Methods.GET.value: lambda resource: resource.get,
         Methods.POST.value: lambda resource: resource.post,
-        Methods.PUT.value: lambda resource: resource.put,
         Methods.DELETE.value: lambda resource: resource.delete,
         Methods.PATCH.value: lambda resource: resource.patch,
     }
@@ -25,30 +25,41 @@ class SchemaAPI:
     def __init__(self, app: FastAPI):
         self.app: FastAPI = app
 
-    def __get_method(self, resource: Union[ResourceList, None], method: str):
+    def __get_method(self, resource: Resource, method: str):
         return SchemaAPI.METHODS_TO_RESOURCE_FUNCTION[method](resource)
 
-    def __get_response_model(self, schema: Schema, resource_method: str) -> BaseModel:
+    def __get_response_model(self, resource: Resource, method: str) -> BaseModel:
         fields = {}
+        schema = resource.schema
         for field_name, field_type in schema._declared_fields.items():
             type_ = SchemaAPI.FIELDS_TO_TYPE.get(type(field_type))
             if type_ is None:
                 raise Exception(f"Field {field_name} has no type")
-            fields[field_name] = type_
+            fields[field_name] = (type_, None)
 
         # For some reasons, FastAPI does not allow to use the same name for the response model
-        return create_model(f"{schema.__type__}-{resource_method}", **fields)
+        model_suffix = "detail" if is_detail_resource(resource) else "list"
+        return create_model(f"{schema.__type__}-{method}-{model_suffix}", **fields)
 
-    def endpoint_wrapper(self, resource: Union[ResourceList, None], method: str):
-        def wrapper(q: Optional[str] = None):
-            return self.__get_method(resource, method)(resource, q)
+    def __get_endpoint_parameters_model(self, resource: Resource, method: str) -> BaseModel:
+        return create_model(f"{resource.schema.__type__}-{method}-endpoint-parameters", **resource.__view_parameters__)
+
+    def __get_endpoint_summary(self, resource: Resource, method: str) -> str:
+        is_detail_resource_ = is_detail_resource(resource)
+        return f"{method} {'a' if is_detail_resource_ else 'multiple'} {resource.schema.__type__}{'' if is_detail_resource_ else 's'}"
+
+    def endpoint_wrapper(self, resource: Resource, method: str):
+        def wrapper(endpoint_parameters: self.__get_endpoint_parameters_model(resource, method) = Depends()):
+            return self.__get_method(resource, method)(resource, endpoint_parameters)
 
         return wrapper
 
-    def register(self, resource: Union[ResourceList, None], path: str):
-        for resource_method in resource.methods:
+    def register(self, resource: Resource, path: str):
+        for method in resource.methods:
+            response_model = self.__get_response_model(resource, method)
             self.app.api_route(
                 path,
-                methods=[resource_method],
-                response_model=self.__get_response_model(resource.schema, resource_method),
-            )(self.endpoint_wrapper(resource, resource_method))
+                methods=[method],
+                summary=self.__get_endpoint_summary(resource, method),
+                response_model=response_model if is_detail_resource(resource) else List[response_model],
+            )(self.endpoint_wrapper(resource, method))

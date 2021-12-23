@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Path
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.engine import create_engine
@@ -6,6 +6,7 @@ from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.pool import QueuePool
 from fastapi_rest_jsonapi import fields
+from fastapi_rest_jsonapi.resource_detail import ResourceDetail
 from fastapi_rest_jsonapi.resource_list import ResourceList
 
 from fastapi_rest_jsonapi.schema import Schema
@@ -44,6 +45,12 @@ class UserList(ResourceList):
     data_layer = SQLAlchemyDataLayer(session, User)
 
 
+class UserDetail(ResourceDetail):
+    __view_parameters__ = {"id": (int, Path(..., title="id", ge=1))}
+    schema = UserSchema
+    data_layer = SQLAlchemyDataLayer(session, User)
+
+
 def generate_users(COUNT: int = 10):
     for i in range(COUNT):
         user = User(name=f"User {i}", age=i)
@@ -53,3 +60,4 @@ def generate_users(COUNT: int = 10):
 
 generate_users()
 schema_api.register(UserList, "/users")
+schema_api.register(UserDetail, "/users/{id}")
