@@ -1,0 +1,4 @@
+include README.md MANIFEST.in LICENSE requirements.txt
+recursive-include fastapi_rest_jsonapi *
+
+global-exclude *.pyc

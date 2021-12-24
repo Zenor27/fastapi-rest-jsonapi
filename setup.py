@@ -1,17 +1,29 @@
+import io
 from setuptools import setup, find_packages
 
-__version__ = "0.0.1"
+__version__ = "0.1"
 
 
 def get_requirements(file_name):
-    with open(file_name) as f:
-        return f.read().splitlines()
+    requirements = []
+    for line in io.open(file_name):
+        line = line.strip()
+        if not line or "://" in line or line.startswith("#"):
+            continue
+        requirements.append(line)
+    return requirements
+
+
+def get_long_description():
+    return io.open("README.md", encoding="utf-8").read()
 
 
 setup(
     name="FastAPI-REST-JSONAPI",
     version=__version__,
     description="FastAPI-REST-JSONAPI",
+    long_description=get_long_description(),
+    long_description_content_type="text/markdown",
     url="https://github.com/Zenor27/fastapi-rest-jsonapi",
     author="Zenor27",
     author_email="antoine.montes@epita.fr",
@@ -21,7 +33,7 @@ setup(
         "Environment :: Web Environment",
         "Framework :: FastAPI",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT LicenseLicense :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
@@ -32,6 +44,7 @@ setup(
     packages=find_packages(exclude=["tests"]),
     zip_safe=False,
     platforms="any",
+    include_package_data=True,
     install_requires=get_requirements("requirements.txt"),
     tests_require=["pytest"],
 )
