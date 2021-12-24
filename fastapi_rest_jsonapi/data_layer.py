@@ -17,3 +17,7 @@ class DataLayer(metaclass=ABCMeta):
     @abstractmethod
     def update_one(self, id: int, **kwargs) -> object:
         raise NotImplementedError
+
+    @abstractmethod
+    def create_one(self, **kwargs) -> object:
+        raise NotImplementedError

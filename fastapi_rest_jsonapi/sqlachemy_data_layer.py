@@ -31,3 +31,9 @@ class SQLAlchemyDataLayer(DataLayer):
             setattr(obj, key, value)
         self.session.commit()
         return obj
+
+    def create_one(self, **kwargs) -> object:
+        obj = self.model(**kwargs)
+        self.session.add(obj)
+        self.session.commit()
+        return obj
