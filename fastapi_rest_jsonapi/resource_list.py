@@ -11,7 +11,7 @@ class ResourceList(Resource):
 
     @staticmethod
     def get(cls: Resource, request_ctx: RequestContext):
-        objects = cls.data_layer.get()
+        objects = cls.data_layer.get(request_ctx.sorts)
         content = cls.schema().dump(obj=objects, many=True)
         return JSONResponse(content=content)
 

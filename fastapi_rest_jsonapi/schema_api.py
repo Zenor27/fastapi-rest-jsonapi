@@ -1,7 +1,8 @@
+from dataclasses import dataclass
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import List, Optional, TypedDict
 from pydantic import BaseModel, create_model
-from fastapi import Depends, Body
+from fastapi import Depends, Body, Query, Request
 from fastapi.applications import FastAPI
 from fastapi_rest_jsonapi.methods import Methods
 from fastapi_rest_jsonapi.request_context import RequestContext
@@ -62,24 +63,27 @@ class SchemaAPI:
         return f"{method} {'a' if is_detail_resource_ else 'multiple'} {resource.schema.__type__}{'' if is_detail_resource_ else 's'}"
 
     def endpoint_wrapper(self, resource: Resource, method: str):
-        if method in [Methods.PATCH.value, Methods.POST.value]:
+        def endpoint(path_parameters, body, sort):
+            request_ctx = RequestContext(path_parameters=path_parameters, query_parameters={"sort": sort}, body=body)
+            return self.__get_method(resource, method)(resource, request_ctx)
+
+        # GET method cannot have body parameter in Swagger UI... So we need to have a different wrapper
+        if method in [Methods.DELETE.value, Methods.PATCH.value, Methods.POST.value]:
 
             def wrapper(
                 path_parameters: self.__get_path_parameters_model(resource, method) = Depends(),
-                q: Optional[str] = None,
                 body: Optional[dict] = Body(default=None),
+                sort: Optional[str] = Query(default=None),
             ):
-                request_ctx = RequestContext(path_parameters=path_parameters, query_parameters=q, body=body)
-                return self.__get_method(resource, method)(resource, request_ctx)
+                return endpoint(path_parameters, body, sort)
 
         else:
 
             def wrapper(
                 path_parameters: self.__get_path_parameters_model(resource, method) = Depends(),
-                q: Optional[str] = None,
+                sort: Optional[str] = Query(default=None),
             ):
-                request_ctx = RequestContext(path_parameters=path_parameters, query_parameters=q, body=None)
-                return self.__get_method(resource, method)(resource, request_ctx)
+                return endpoint(path_parameters, None, sort)
 
         return wrapper
 

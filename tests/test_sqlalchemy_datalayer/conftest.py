@@ -56,8 +56,8 @@ def user(session: Session, user_model):
 @fixture()
 def users(session: Session, user_model):
     users = []
-    for i in range(10):
-        user = user_model(name="John", age=i)
+    for i in range(10, 0, -1):
+        user = user_model(name=f"John {i}", age=i)
         users.append(user)
         session.add(user)
     session.commit()
@@ -99,3 +99,9 @@ def user_detail(user_schema, session: Session, user_model):
 def register_schema_routes(schema_api: SchemaAPI, user_list, user_detail):
     schema_api.register(user_list, "/users")
     schema_api.register(user_detail, "/users/{id}")
+
+
+@fixture()
+def generate_data():
+    generate_data = lambda user: {"type": "user", "id": user.id, "attributes": {"name": user.name, "age": user.age}}
+    return generate_data
