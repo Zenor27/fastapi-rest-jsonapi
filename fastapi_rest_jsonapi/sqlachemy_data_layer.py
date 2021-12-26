@@ -1,9 +1,8 @@
-from typing import List
-
 from sqlalchemy.orm.query import Query
 from fastapi_rest_jsonapi.data_layer import DataLayer
 from sqlalchemy import desc
 from sqlalchemy.orm.session import Session
+from fastapi_rest_jsonapi.field import Field
 
 from fastapi_rest_jsonapi.sort import Sort
 
@@ -13,6 +12,14 @@ class SQLAlchemyDataLayer(DataLayer):
         self.session: Session = session
         self.model = model
 
+    def __table_name_to_model(self, table_name: str):
+        for mapper in self.model.__mapper__.registry.mappers:
+            class_ = mapper.class_
+            if hasattr(class_, "__tablename__") and class_.__tablename__ == table_name:
+                return class_
+
+        raise ValueError(f"No model found for table {table_name}")
+
     def __sort_query(self, query: Query, sorts: list[Sort]) -> Query:
         for sort in sorts:
             if sort.ascending:
@@ -21,8 +28,19 @@ class SQLAlchemyDataLayer(DataLayer):
                 query = query.order_by(desc(getattr(self.model, sort.field)))
         return query
 
-    def get(self, sorts: List[Sort]) -> list:
-        query: Query = self.session.query(self.model)
+    def __field_query(self, fields: list[Field]) -> Query:
+        if not fields:
+            return self.session.query(self.model)
+
+        query_fields = [self.model.id]
+        for field in fields:
+            field_model = self.__table_name_to_model(field.type)
+            query_fields.append(getattr(field_model, field.field))
+
+        return self.session.query(*query_fields)
+
+    def get(self, sorts: list[Sort], fields: list[Field]) -> list:
+        query: Query = self.__field_query(fields)
         query = self.__sort_query(query, sorts)
         return query.all()
 

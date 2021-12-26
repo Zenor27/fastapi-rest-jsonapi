@@ -103,7 +103,14 @@ def register_schema_routes(schema_api: SchemaAPI, user_list, user_detail):
 
 @fixture()
 def generate_data():
-    def _generate_data(user):
-        return {"type": "user", "id": user.id, "attributes": {"name": user.name, "age": user.age}}
+    def _generate_data(user, only_fields=None):
+        if only_fields is not None:
+            attributes = {field: getattr(user, field) for field in only_fields}
+        else:
+            attributes = {
+                "name": user.name,
+                "age": user.age,
+            }
+        return {"type": "user", "id": user.id, "attributes": attributes}
 
     return _generate_data

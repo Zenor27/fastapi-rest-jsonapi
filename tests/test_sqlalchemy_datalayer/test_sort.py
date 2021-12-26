@@ -31,3 +31,8 @@ def test_sorting_multiple_fields_desc(client: TestClient, users, generate_data):
     assert response.json() == {
         "data": [generate_data(user) for user in sorted(users, key=lambda user: (user.age, user.name), reverse=True)]
     }
+
+
+def test_sorting_non_existing_field(client: TestClient, users, generate_data):
+    response: Response = client.get("/users?sort=foobar")
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
