@@ -34,7 +34,11 @@ def user_model(model_base):
 
 @fixture()
 def engine(user_model) -> Engine:
-    engine: Engine = create_engine("sqlite:///:memory:", poolclass=QueuePool, connect_args={"check_same_thread": False})
+    engine: Engine = create_engine(
+        "sqlite:///:memory:",
+        poolclass=QueuePool,
+        connect_args={"check_same_thread": False},
+    )
     user_model.metadata.create_all(engine)
     yield engine
 
