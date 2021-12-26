@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, create_model
 from fastapi import Depends, Body, Query
 from fastapi.applications import FastAPI
+from fastapi.exceptions import HTTPException
 from fastapi_rest_jsonapi.methods import Methods
 from fastapi_rest_jsonapi.request_context import RequestContext
 from fastapi_rest_jsonapi.resource import Resource
@@ -55,7 +56,10 @@ class SchemaAPI:
         return List[response_model]
 
     def __get_path_parameters_model(self, resource: Resource, method: str) -> BaseModel:
-        return create_model(f"{resource.schema.__type__}-{method}-path-parameters", **resource.__view_parameters__)
+        return create_model(
+            f"{resource.schema.__type__}-{method}-path-parameters",
+            **resource.__view_parameters__,
+        )
 
     def __get_endpoint_summary(self, resource: Resource, method: str) -> str:
         is_detail_resource_ = is_detail_resource(resource)
@@ -65,9 +69,16 @@ class SchemaAPI:
         )
 
     def endpoint_wrapper(self, resource: Resource, method: str):
-        def endpoint(path_parameters, body, sort):
-            request_ctx = RequestContext(path_parameters=path_parameters, query_parameters={"sort": sort}, body=body)
-            return self.__get_method(resource, method)(resource, request_ctx)
+        def endpoint(path_parameters, body, sort, field):
+            try:
+                request_ctx = RequestContext(
+                    path_parameters=path_parameters,
+                    query_parameters={"sort": sort, "field": field},
+                    body=body,
+                )
+                return self.__get_method(resource, method)(resource, request_ctx)
+            except (ValueError, AttributeError):
+                raise HTTPException(status_code=500, detail="Internal server error")
 
         # GET method cannot have body parameter in Swagger UI... So we need to have a different wrapper
         if method in [Methods.DELETE.value, Methods.PATCH.value, Methods.POST.value]:
@@ -76,16 +87,18 @@ class SchemaAPI:
                 path_parameters: self.__get_path_parameters_model(resource, method) = Depends(),
                 body: Optional[dict] = Body(default=None),
                 sort: Optional[str] = Query(default=None),
+                field: Optional[List[str]] = Query(default=None),
             ):
-                return endpoint(path_parameters, body, sort)
+                return endpoint(path_parameters, body, sort, field)
 
         else:
 
             def wrapper(
                 path_parameters: self.__get_path_parameters_model(resource, method) = Depends(),
                 sort: Optional[str] = Query(default=None),
+                field: Optional[List[str]] = Query(default=None),
             ):
-                return endpoint(path_parameters, None, sort)
+                return endpoint(path_parameters, None, sort, field)
 
         return wrapper
 
@@ -99,5 +112,6 @@ class SchemaAPI:
                 methods=[method],
                 summary=self.__get_endpoint_summary(resource, method),
                 response_model=response_model,
+                tags=[resource.schema.__type__],
             )(self.endpoint_wrapper(resource, method))
             self.logger.info(f"✅ Registered {method} {path}")

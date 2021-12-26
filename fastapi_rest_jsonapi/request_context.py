@@ -1,5 +1,7 @@
+import re
 from pydantic import BaseModel
 from typing import Optional
+from fastapi_rest_jsonapi.field import Field
 
 from fastapi_rest_jsonapi.sort import Sort
 
@@ -28,3 +30,19 @@ class RequestContext:
             else:
                 sorts.append(Sort(field=sort, ascending=True))
         return sorts
+
+    @property
+    def fields(self) -> list[Field]:
+        regex = r"\[(?P<type>.*)\]=(?P<fields>.*)"
+        fields = []
+        query_field = self.query_parameters.get("field")
+        if query_field is None:
+            return fields
+
+        for field in query_field:
+            if m := re.search(regex, field):
+                type = m.group("type")
+                type_fields = m.group("fields").split(",")
+                fields.extend([Field(type, type_field) for type_field in type_fields])
+
+        return fields
