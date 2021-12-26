@@ -1,9 +1,11 @@
 from abc import ABCMeta, abstractmethod
 
+from fastapi_rest_jsonapi.sort import Sort
+
 
 class DataLayer(metaclass=ABCMeta):
     @abstractmethod
-    def get(self) -> list:
+    def get(self, sorts: list[Sort]) -> list:
         raise NotImplementedError
 
     @abstractmethod

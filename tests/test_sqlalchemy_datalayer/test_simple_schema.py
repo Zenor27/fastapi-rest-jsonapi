@@ -12,10 +12,9 @@ def test_simple_list(client: TestClient, user):
     }
 
 
-def test_simple_list_multiple_users(client: TestClient, users):
+def test_simple_list_multiple_users(client: TestClient, users, generate_data):
     response: Response = client.get("/users")
     assert response.status_code == status.HTTP_200_OK
-    generate_data = lambda user: {"type": "user", "id": user.id, "attributes": {"name": user.name, "age": user.age}}
     assert response.json() == {"data": [generate_data(user) for user in users]}
 
 
