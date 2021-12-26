@@ -103,5 +103,7 @@ def register_schema_routes(schema_api: SchemaAPI, user_list, user_detail):
 
 @fixture()
 def generate_data():
-    generate_data = lambda user: {"type": "user", "id": user.id, "attributes": {"name": user.name, "age": user.age}}
-    return generate_data
+    def _generate_data(user):
+        return {"type": "user", "id": user.id, "attributes": {"name": user.name, "age": user.age}}
+
+    return _generate_data

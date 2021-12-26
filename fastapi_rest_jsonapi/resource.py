@@ -1,8 +1,6 @@
 from __future__ import annotations
-from typing import Optional, TypeVar
 from abc import ABCMeta, abstractstaticmethod
 
-from pydantic.main import BaseModel
 from fastapi_rest_jsonapi.methods import Methods
 from fastapi_rest_jsonapi.request_context import RequestContext
 from fastapi_rest_jsonapi.schema import Schema

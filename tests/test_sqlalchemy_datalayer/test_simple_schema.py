@@ -27,7 +27,7 @@ def test_simple_detail(client: TestClient, user):
 
 
 def test_simple_detail_object_not_found(client: TestClient):
-    response: Response = client.get(f"/users/999")
+    response: Response = client.get("/users/999")
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -46,7 +46,7 @@ def test_simple_delete(client: TestClient, user):
 
 
 def test_simple_delete_object_not_found(client: TestClient):
-    response: Response = client.delete(f"/users/42")
+    response: Response = client.delete("/users/42")
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -57,7 +57,7 @@ def test_simple_delete_multiple_users(client: TestClient, users):
 
 
 def test_simple_delete_multiple_users_object_not_found(client: TestClient, users):
-    response: Response = client.delete(f"/users/999")
+    response: Response = client.delete("/users/999")
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 

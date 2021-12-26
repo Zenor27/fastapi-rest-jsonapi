@@ -1,8 +1,7 @@
-from dataclasses import dataclass
 from logging import Logger, getLogger
-from typing import List, Optional, TypedDict
+from typing import List, Optional
 from pydantic import BaseModel, create_model
-from fastapi import Depends, Body, Query, Request
+from fastapi import Depends, Body, Query
 from fastapi.applications import FastAPI
 from fastapi_rest_jsonapi.methods import Methods
 from fastapi_rest_jsonapi.request_context import RequestContext
@@ -60,7 +59,10 @@ class SchemaAPI:
 
     def __get_endpoint_summary(self, resource: Resource, method: str) -> str:
         is_detail_resource_ = is_detail_resource(resource)
-        return f"{method} {'a' if is_detail_resource_ else 'multiple'} {resource.schema.__type__}{'' if is_detail_resource_ else 's'}"
+        schema_type = resource.schema.__type__
+        return (
+            f"{method} {'a' if is_detail_resource_ else 'multiple'} {schema_type}{'' if is_detail_resource_ else 's'}"
+        )
 
     def endpoint_wrapper(self, resource: Resource, method: str):
         def endpoint(path_parameters, body, sort):

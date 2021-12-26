@@ -1,5 +1,3 @@
-from typing import Optional
-from pydantic import BaseModel
 from fastapi import status
 from fastapi.responses import JSONResponse, Response
 from fastapi_rest_jsonapi.methods import Methods
