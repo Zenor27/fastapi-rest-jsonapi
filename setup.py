@@ -1,7 +1,7 @@
 import io
 from setuptools import setup, find_packages
 
-__version__ = "0.3"
+__version__ = "0.4"
 
 
 def get_requirements(file_name):
