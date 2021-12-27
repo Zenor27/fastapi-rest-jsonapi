@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
-from fastapi_rest_jsonapi.field import Field
-
-from fastapi_rest_jsonapi.sort import Sort
+from fastapi_rest_jsonapi.request.sort import Sort
+from fastapi_rest_jsonapi.request.field import Field
 
 
 class DataLayer(metaclass=ABCMeta):

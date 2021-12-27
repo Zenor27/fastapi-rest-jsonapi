@@ -1,10 +1,10 @@
 from __future__ import annotations
 from abc import ABCMeta, abstractstaticmethod
 
-from fastapi_rest_jsonapi.methods import Methods
-from fastapi_rest_jsonapi.request_context import RequestContext
+from fastapi_rest_jsonapi.data import DataLayer
+from fastapi_rest_jsonapi.common import Methods
 from fastapi_rest_jsonapi.schema import Schema
-from fastapi_rest_jsonapi.data_layer import DataLayer
+from fastapi_rest_jsonapi.request.request_context import RequestContext
 
 
 class Resource(metaclass=ABCMeta):

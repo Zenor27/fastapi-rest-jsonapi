@@ -7,12 +7,10 @@ from sqlalchemy.engine import create_engine
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import Session
-from fastapi_rest_jsonapi import SchemaAPI
-from fastapi_rest_jsonapi import fields
-from fastapi_rest_jsonapi.resource_detail import ResourceDetail
-from fastapi_rest_jsonapi.resource_list import ResourceList
-from fastapi_rest_jsonapi.schema import Schema
-from fastapi_rest_jsonapi.sqlachemy_data_layer import SQLAlchemyDataLayer
+from fastapi_rest_jsonapi import RestAPI
+from fastapi_rest_jsonapi.data import SQLAlchemyDataLayer
+from fastapi_rest_jsonapi.schema import fields, Schema
+from fastapi_rest_jsonapi.resource import ResourceDetail, ResourceList
 
 
 @fixture()
@@ -100,9 +98,9 @@ def user_detail(user_schema, session: Session, user_model):
 
 
 @fixture(autouse=True)
-def register_schema_routes(schema_api: SchemaAPI, user_list, user_detail):
-    schema_api.register(user_list, "/users")
-    schema_api.register(user_detail, "/users/{id}")
+def register_schema_routes(rest_api: RestAPI, user_list, user_detail):
+    rest_api.register(user_list, "/users")
+    rest_api.register(user_detail, "/users/{id}")
 
 
 @fixture()

@@ -1,9 +1,9 @@
 from fastapi import status
 from fastapi.responses import JSONResponse
 from starlette.responses import Response
-from fastapi_rest_jsonapi.methods import Methods
-from fastapi_rest_jsonapi.request_context import RequestContext
 from fastapi_rest_jsonapi.resource import Resource
+from fastapi_rest_jsonapi.common.methods import Methods
+from fastapi_rest_jsonapi.request.request_context import RequestContext
 
 
 class ResourceList(Resource):

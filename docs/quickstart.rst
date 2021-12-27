@@ -20,10 +20,10 @@ You first need to initialize the FastAPI application and the REST API.
 .. code-block:: python
 
     from fastapi import FastAPI
-    from fastapi_rest_jsonapi.schema_api import SchemaAPI
+    from fastapi_rest_jsonapi.rest_api import RestAPI
 
     app = FastAPI()
-    schema_api = SchemaAPI(app)
+    rest_api = RestAPI(app)
 
 Database model
 --------------
@@ -80,8 +80,7 @@ We first need to define a schema, it will be the response structure of our API.
 
 .. code-block:: python
 
-    from fastapi_rest_jsonapi import fields
-    from fastapi_rest_jsonapi.schema import Schema
+    from fastapi_rest_jsonapi.schema import fields, Schema
 
     class UserSchema(Schema):
         __type__ = "user"
@@ -96,9 +95,8 @@ Then we need to create the resources.
 .. code-block:: python
 
     from fastapi import Path
-    from fastapi_rest_jsonapi.resource_detail import ResourceDetail
-    from fastapi_rest_jsonapi.resource_list import ResourceList
-    from fastapi_rest_jsonapi.sqlachemy_data_layer import SQLAlchemyDataLayer
+    from fastapi_rest_jsonapi.resource import ResourceDetail, ResourceList
+    from fastapi_rest_jsonapi.data import SQLAlchemyDataLayer
 
     class UserList(ResourceList):
         schema = UserSchema
@@ -142,8 +140,8 @@ Now we just need to register our resources and give them a URL.
 
 .. code-block:: python
 
-    schema_api.register(UserList, "/users")
-    schema_api.register(UserDetail, "/users/{id}")
+    rest_api.register(UserList, "/users")
+    rest_api.register(UserDetail, "/users/{id}")
 
 
 Let's run the app now.
