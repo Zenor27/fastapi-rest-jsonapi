@@ -1,5 +1,9 @@
 # FastAPI REST JSONAPI 🚀
 
+# Documentation
+
+You can find the [documentation here](https://fastapi-rest-jsonapi.readthedocs.io/en/latest/).
+
 # Setup
 
 ```
