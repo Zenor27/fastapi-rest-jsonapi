@@ -1,9 +1,8 @@
 import re
 from pydantic import BaseModel
 from typing import Optional
-from fastapi_rest_jsonapi.field import Field
-
-from fastapi_rest_jsonapi.sort import Sort
+from fastapi_rest_jsonapi.request.field import Field
+from fastapi_rest_jsonapi.request.sort import Sort
 
 
 class RequestContext:

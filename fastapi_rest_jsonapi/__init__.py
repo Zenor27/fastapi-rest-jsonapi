@@ -1,5 +1,7 @@
 from fastapi_rest_jsonapi.schema import Schema
-from fastapi_rest_jsonapi.schema_api import SchemaAPI
-from fastapi_rest_jsonapi.resource_list import ResourceList
+from fastapi_rest_jsonapi.rest_api import RestAPI
+from fastapi_rest_jsonapi.resource import Resource, ResourceDetail, ResourceList
+from fastapi_rest_jsonapi.data import DataLayer, SQLAlchemyDataLayer
 
-__all__ = ["SchemaAPI", "Schema", "ResourceList"]
+
+__all__ = ["RestAPI", "Schema", "Resource", "ResourceList", "ResourceDetail", "DataLayer", "SQLAlchemyDataLayer"]

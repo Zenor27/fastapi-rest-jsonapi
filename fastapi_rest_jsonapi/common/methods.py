@@ -1,5 +1,5 @@
 from enum import Enum
-from fastapi_rest_jsonapi.enum import EnumMeta
+from fastapi_rest_jsonapi.common.enum import EnumMeta
 
 
 class Methods(Enum, metaclass=EnumMeta):

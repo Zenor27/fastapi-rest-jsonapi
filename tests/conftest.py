@@ -1,7 +1,7 @@
 from pytest import fixture
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from fastapi_rest_jsonapi import SchemaAPI
+from fastapi_rest_jsonapi import RestAPI
 
 
 @fixture()
@@ -16,6 +16,6 @@ def client(app: FastAPI) -> TestClient:
 
 
 @fixture()
-def schema_api(app: FastAPI) -> SchemaAPI:
-    schema_api: SchemaAPI = SchemaAPI(app)
-    return schema_api
+def rest_api(app: FastAPI) -> RestAPI:
+    rest_api: RestAPI = RestAPI(app)
+    return rest_api

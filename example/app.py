@@ -5,16 +5,13 @@ from sqlalchemy.engine import create_engine
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.pool import QueuePool
-from fastapi_rest_jsonapi import fields
-from fastapi_rest_jsonapi.resource_detail import ResourceDetail
-from fastapi_rest_jsonapi.resource_list import ResourceList
-
-from fastapi_rest_jsonapi.schema import Schema
-from fastapi_rest_jsonapi.schema_api import SchemaAPI
-from fastapi_rest_jsonapi.sqlachemy_data_layer import SQLAlchemyDataLayer
+from fastapi_rest_jsonapi.rest_api import RestAPI
+from fastapi_rest_jsonapi.schema import fields, Schema
+from fastapi_rest_jsonapi.resource import ResourceDetail, ResourceList
+from fastapi_rest_jsonapi.data import SQLAlchemyDataLayer
 
 app = FastAPI()
-schema_api = SchemaAPI(app)
+rest_api = RestAPI(app)
 
 BaseModel = declarative_base()
 
@@ -59,5 +56,5 @@ def generate_users(COUNT: int = 10):
 
 
 generate_users()
-schema_api.register(UserList, "/users")
-schema_api.register(UserDetail, "/users/{id}")
+rest_api.register(UserList, "/users")
+rest_api.register(UserDetail, "/users/{id}")

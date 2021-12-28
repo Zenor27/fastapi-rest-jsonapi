@@ -4,15 +4,14 @@ from pydantic import BaseModel, create_model
 from fastapi import Depends, Body, Query
 from fastapi.applications import FastAPI
 from fastapi.exceptions import HTTPException
-from fastapi_rest_jsonapi.methods import Methods
-from fastapi_rest_jsonapi.request_context import RequestContext
+from fastapi_rest_jsonapi.common import Methods
+from fastapi_rest_jsonapi.schema import fields, Schema
+from fastapi_rest_jsonapi.request.request_context import RequestContext
 from fastapi_rest_jsonapi.resource import Resource
-from fastapi_rest_jsonapi import fields
-from fastapi_rest_jsonapi.schema import Schema
-from fastapi_rest_jsonapi.utils import is_detail_resource
+from fastapi_rest_jsonapi.resource.utils import is_detail_resource
 
 
-class SchemaAPI:
+class RestAPI:
     METHODS_TO_RESOURCE_FUNCTION = {
         Methods.GET.value: lambda resource: resource.get,
         Methods.POST.value: lambda resource: resource.post,
@@ -33,12 +32,12 @@ class SchemaAPI:
             self.logger = logger
 
     def __get_method(self, resource: Resource, method: str):
-        return SchemaAPI.METHODS_TO_RESOURCE_FUNCTION[method](resource)
+        return RestAPI.METHODS_TO_RESOURCE_FUNCTION[method](resource)
 
     def __get_schema_fields(self, schema: Schema) -> dict[str, tuple[type, ...]]:
         fields = {}
         for field_name, field_type in schema._declared_fields.items():
-            type_ = SchemaAPI.FIELDS_TO_TYPE.get(type(field_type))
+            type_ = RestAPI.FIELDS_TO_TYPE.get(type(field_type))
             if type_ is None:
                 raise Exception(f"Field {field_name} has no type")
             fields[field_name] = (type_, None)

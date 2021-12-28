@@ -1,10 +1,8 @@
 from pytest import fixture
 from fastapi import Path
-from fastapi_rest_jsonapi import fields
-from fastapi_rest_jsonapi.schema import Schema
-from fastapi_rest_jsonapi.resource_list import ResourceList
-from fastapi_rest_jsonapi.resource_detail import ResourceDetail
-from fastapi_rest_jsonapi.utils import is_detail_resource
+from fastapi_rest_jsonapi.schema import fields, Schema
+from fastapi_rest_jsonapi.resource import ResourceList, ResourceDetail
+from fastapi_rest_jsonapi.resource.utils import is_detail_resource
 
 
 @fixture()

@@ -1,10 +1,9 @@
 from sqlalchemy.orm.query import Query
-from fastapi_rest_jsonapi.data_layer import DataLayer
 from sqlalchemy import desc
 from sqlalchemy.orm.session import Session
-from fastapi_rest_jsonapi.field import Field
-
-from fastapi_rest_jsonapi.sort import Sort
+from fastapi_rest_jsonapi.data import DataLayer
+from fastapi_rest_jsonapi.request.sort import Sort
+from fastapi_rest_jsonapi.request.field import Field
 
 
 class SQLAlchemyDataLayer(DataLayer):
