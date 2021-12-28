@@ -2,6 +2,7 @@ import re
 from pydantic import BaseModel
 from typing import Optional
 from fastapi_rest_jsonapi.request.field import Field
+from fastapi_rest_jsonapi.request.page import Page
 from fastapi_rest_jsonapi.request.sort import Sort
 
 
@@ -45,3 +46,27 @@ class RequestContext:
                 fields.extend([Field(type, type_field) for type_field in type_fields])
 
         return fields
+
+    @property
+    def page(self) -> Page:
+        regex = r"\[(?P<param_type>.*)\]=(?P<param_value>.*)"
+        query_page = self.query_parameters.get("page")
+        if query_page is None:
+            return None
+
+        page_size = None
+        page_number = None
+
+        for page_ in query_page:
+            if m := re.search(regex, page_):
+                param_type = m.group("param_type")
+                param_value = m.group("param_value")
+                if param_type == "number":
+                    page_number = int(param_value)
+                elif param_type == "size":
+                    page_size = int(param_value)
+
+        if page_number is None:
+            page_number = 1
+
+        return Page(page_number, page_size)

@@ -1,11 +1,12 @@
 from abc import ABCMeta, abstractmethod
+from fastapi_rest_jsonapi.request.page import Page
 from fastapi_rest_jsonapi.request.sort import Sort
 from fastapi_rest_jsonapi.request.field import Field
 
 
 class DataLayer(metaclass=ABCMeta):
     @abstractmethod
-    def get(self, sorts: list[Sort], fields: list[Field]) -> list:
+    def get(self, sorts: list[Sort], fields: list[Field], page: Page) -> list:
         raise NotImplementedError
 
     @abstractmethod
