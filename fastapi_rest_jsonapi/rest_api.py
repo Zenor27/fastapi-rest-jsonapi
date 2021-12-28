@@ -1,7 +1,7 @@
 from logging import Logger, getLogger
-from typing import Counter, List, Optional
+from typing import List, Optional
 from pydantic import BaseModel, create_model
-from fastapi import Depends, Body, Query, Request
+from fastapi import Depends, Body, Request
 from fastapi.applications import FastAPI
 from fastapi.exceptions import HTTPException
 from fastapi_rest_jsonapi.common import Methods
@@ -9,32 +9,6 @@ from fastapi_rest_jsonapi.schema import fields, Schema
 from fastapi_rest_jsonapi.request.request_context import RequestContext
 from fastapi_rest_jsonapi.resource import Resource
 from fastapi_rest_jsonapi.resource.utils import is_detail_resource
-
-
-class Fields(BaseModel):
-
-    name: str
-    q: str
-
-    @staticmethod
-    def parse(value: str) -> "Fields":
-        vals = value.split(":", 1)
-        return Fields(name=vals[0], q=vals[1] or "")
-
-
-def parse_fields(options: List[str]):
-    async def _parse_fields(fields: List[str] = Query(None)):
-        if not isinstance(filter, list):
-            return []
-
-        resp = [Fields.parse(f) for f in filter]
-
-        counter = Counter([f.name for f in resp])
-        if counter.most_common(1)[0][1] > 1:
-            raise HTTPException(status_code=400, detail="Duplicate query parameters supplied for filter")
-        return resp
-
-    return _parse_fields
 
 
 class RestAPI:
