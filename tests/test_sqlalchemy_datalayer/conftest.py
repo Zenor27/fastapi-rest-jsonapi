@@ -58,7 +58,7 @@ def user(session: Session, user_model):
 @fixture()
 def users(session: Session, user_model):
     users = []
-    for i in range(10, 0, -1):
+    for i in range(60, 0, -1):
         user = user_model(name=f"John {i}", age=i)
         users.append(user)
         session.add(user)
@@ -83,6 +83,7 @@ def user_list(user_schema, session: Session, user_model):
     class UserList(ResourceList):
         schema = user_schema
         data_layer = SQLAlchemyDataLayer(session, user_model)
+        page_size = 0
 
     yield UserList
 

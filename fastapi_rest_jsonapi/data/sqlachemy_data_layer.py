@@ -2,6 +2,7 @@ from sqlalchemy.orm.query import Query
 from sqlalchemy import desc
 from sqlalchemy.orm.session import Session
 from fastapi_rest_jsonapi.data import DataLayer
+from fastapi_rest_jsonapi.request.page import Page
 from fastapi_rest_jsonapi.request.sort import Sort
 from fastapi_rest_jsonapi.request.field import Field
 
@@ -38,9 +39,16 @@ class SQLAlchemyDataLayer(DataLayer):
 
         return self.session.query(*query_fields)
 
-    def get(self, sorts: list[Sort], fields: list[Field]) -> list:
+    def __paginate_query(self, query: Query, page: Page) -> Query:
+        if page.size == 0:
+            return query
+
+        return query.offset(page.size * (page.number - 1)).limit(page.size)
+
+    def get(self, sorts: list[Sort], fields: list[Field], page: Page) -> list:
         query: Query = self.__field_query(fields)
         query = self.__sort_query(query, sorts)
+        query = self.__paginate_query(query, page)
         return query.all()
 
     def get_one(self, id: int) -> object:

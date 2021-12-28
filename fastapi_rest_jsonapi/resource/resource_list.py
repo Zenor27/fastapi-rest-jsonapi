@@ -6,12 +6,20 @@ from fastapi_rest_jsonapi.common.methods import Methods
 from fastapi_rest_jsonapi.request.request_context import RequestContext
 
 
+DEFAULT_PAGE_SIZE = 30
+
+
 class ResourceList(Resource):
     methods = [Methods.GET.value, Methods.POST.value]
+    page_size = DEFAULT_PAGE_SIZE
 
     @staticmethod
     def get(cls: Resource, request_ctx: RequestContext):
-        objects = cls.data_layer.get(request_ctx.sorts, request_ctx.fields)
+        request_ctx_page = request_ctx.page
+        if request_ctx_page.size is None:
+            request_ctx_page.size = cls.page_size
+
+        objects = cls.data_layer.get(request_ctx.sorts, request_ctx.fields, request_ctx_page)
         content = cls.schema().dump(obj=objects, many=True)
         return JSONResponse(content=content)
 
