@@ -1,3 +1,4 @@
+from math import ceil
 from sqlalchemy.orm.query import Query
 from sqlalchemy import desc
 from sqlalchemy.orm.session import Session
@@ -43,6 +44,8 @@ class SQLAlchemyDataLayer(DataLayer):
         if page.size == 0:
             return query
 
+        total = query.count()
+        page.max_number = ceil(total / page.size)
         return query.offset(page.size * (page.number - 1)).limit(page.size)
 
     def get(self, sorts: list[Sort], fields: list[Field], page: Page) -> list:
