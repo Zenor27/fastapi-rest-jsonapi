@@ -56,9 +56,14 @@ def user(session: Session, user_model):
 
 
 @fixture()
-def users(session: Session, user_model):
+def user_count():
+    return 60
+
+
+@fixture()
+def users(session: Session, user_model, user_count):
     users = []
-    for i in range(60, 0, -1):
+    for i in range(user_count, 0, -1):
         user = user_model(name=f"John {i}", age=i)
         users.append(user)
         session.add(user)

@@ -112,12 +112,14 @@ class RestAPI:
         def endpoint(request: Request, path_parameters, body):
             try:
                 request_ctx = RequestContext(
+                    url=request.url,
                     path_parameters=path_parameters,
                     query_parameters=self.__get_query_parameters_dict(request),
                     body=body,
                 )
                 return self.__get_method(resource, method)(resource, request_ctx)
-            except (ValueError, AttributeError):
+            except (ValueError, AttributeError) as exc:
+                self.logger.error(exc)
                 raise HTTPException(status_code=500, detail="Internal server error")
 
         # GET method cannot have body parameter in Swagger UI... So we need to have a different wrapper
