@@ -1,14 +1,14 @@
-from urllib.parse import unquote
+from itertools import chain
 from typing import Optional
 from starlette.datastructures import URL
-
 
 PAGE_NUMBER_QUERY_PARAM = "page[number]"
 
 
 class Page:
-    def __init__(self, url: URL, number: int, size: Optional[int] = None) -> None:
+    def __init__(self, url: URL, query_params: Optional[dict], number: int, size: Optional[int] = None) -> None:
         self.url = url
+        self.query_params = query_params
         self.number = number
         self.size = size
         self.max_number = None
@@ -17,10 +17,12 @@ class Page:
         return self.size is not None and self.size > 0
 
     def __get_query_params_as_dict(self) -> dict:
-        query_params = unquote(self.url.query).split("&")
-        if not len(query_params) or query_params[0] == "":
+        if not self.query_params:
             return {}
-        return {k: v for k, v in [param.split("=") for param in query_params]}
+        non_iterable_query_params = {k: v for k, v in self.query_params.items() if v and not isinstance(v, list)}
+        iterable_query_params = {k: v for k, v in self.query_params.items() if v and k not in non_iterable_query_params}
+        iterable_query_params = {v.split("=")[0]: v.split("=")[1] for v in chain(*iterable_query_params.values())}
+        return non_iterable_query_params | iterable_query_params
 
     def get_self_link(self) -> str:
         return str(self.url)
