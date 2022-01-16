@@ -88,6 +88,6 @@ class RequestContext:
         if page_number is None:
             page_number = 1
 
-        page = Page(self.url, page_number, page_size)
+        page = Page(self.url, self.query_parameters, page_number, page_size)
         self._page = page
         return page
