@@ -1,10 +1,10 @@
 from logging import Logger, getLogger
 from typing import List, Optional
 from pydantic import BaseModel, create_model
-from fastapi import Depends, Body, Request
+from fastapi import Depends, Body, Request, Response
 from fastapi.applications import FastAPI
-from fastapi.exceptions import HTTPException
 from fastapi_rest_jsonapi.common import Methods
+from fastapi_rest_jsonapi.common.exceptions import RestAPIException
 from fastapi_rest_jsonapi.schema import fields, Schema
 from fastapi_rest_jsonapi.request.request_context import RequestContext
 from fastapi_rest_jsonapi.resource import Resource
@@ -24,7 +24,7 @@ class RestAPI:
         fields.String: str,
     }
 
-    QUERY_PARAMETER_KEYS = ["sort", "field", "page"]
+    QUERY_PARAMETER_KEYS = ["sort", "field", "page", "include"]
 
     def __init__(self, app: FastAPI, logger: Logger = None):
         self.app: FastAPI = app
@@ -44,13 +44,15 @@ class RestAPI:
         return RestAPI.METHODS_TO_RESOURCE_FUNCTION[method](resource)
 
     def __get_schema_fields(self, schema: Schema) -> dict[str, tuple[type, ...]]:
-        fields = {}
+        fields_ = {}
         for field_name, field_type in schema._declared_fields.items():
-            type_ = RestAPI.FIELDS_TO_TYPE.get(type(field_type))
-            if type_ is None:
+            if type(field_type) is fields.Relationship:
+                continue
+            if type_ := RestAPI.FIELDS_TO_TYPE.get(type(field_type)):
+                fields_[field_name] = (type_, None)
+            else:
                 raise Exception(f"Field {field_name} has no type")
-            fields[field_name] = (type_, None)
-        return fields
+        return fields_
 
     def __get_response_model(self, resource: Resource, method: str) -> BaseModel:
         schema = resource.schema
@@ -80,7 +82,7 @@ class RestAPI:
         request_query_params_dict = request.query_params._dict
 
         def __get_query_params_with_brackets(query_param_name: str):
-            if query_param_name == "sort":
+            if query_param_name in ["sort", "include"]:
                 return request_query_params_dict.get(query_param_name)
 
             # Handle swagger that write query parameters with brackets as parameter=parameter[...]=somevalue
@@ -118,9 +120,11 @@ class RestAPI:
                     body=body,
                 )
                 return self.__get_method(resource, method)(resource, request_ctx)
-            except (ValueError, AttributeError) as exc:
-                self.logger.error(exc)
-                raise HTTPException(status_code=500, detail="Internal server error")
+            except RestAPIException as exc:
+                return Response(status_code=exc.status, content=str(exc.message))
+            except Exception as exc:
+                self.logger.error(exc, exc_info=exc)
+                return Response(status_code=500, content=str("Unknown error"))
 
         # GET method cannot have body parameter in Swagger UI... So we need to have a different wrapper
         if method in [Methods.DELETE.value, Methods.PATCH.value, Methods.POST.value]:
