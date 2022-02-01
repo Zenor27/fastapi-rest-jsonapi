@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from abc import ABCMeta, abstractstaticmethod
 
 from fastapi_rest_jsonapi.data import DataLayer
@@ -9,7 +10,7 @@ from fastapi_rest_jsonapi.request.request_context import RequestContext
 
 class Resource(metaclass=ABCMeta):
     methods = Methods.values()
-    schema: Schema = None
+    schema: type[Schema] = None
     data_layer: DataLayer = None
     __view_parameters__: dict[str, type] = {}
 

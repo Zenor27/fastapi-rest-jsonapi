@@ -2,7 +2,9 @@ import re
 from pydantic import BaseModel
 from typing import Optional
 from starlette.datastructures import URL
+from fastapi_rest_jsonapi.common import memoized_property
 from fastapi_rest_jsonapi.request.field import Field
+from fastapi_rest_jsonapi.request.include import Include
 from fastapi_rest_jsonapi.request.page import Page
 from fastapi_rest_jsonapi.request.sort import Sort
 
@@ -20,15 +22,8 @@ class RequestContext:
         self.query_parameters = query_parameters
         self.body = body
 
-        self._sorts = None
-        self._fields = None
-        self._page = None
-
-    @property
+    @memoized_property
     def sorts(self) -> list[Sort]:
-        if self._sorts:
-            return self._sorts
-
         sorts = []
         query_sort = self.query_parameters.get("sort")
         if query_sort is None:
@@ -40,14 +35,10 @@ class RequestContext:
             else:
                 sorts.append(Sort(field=sort, ascending=True))
 
-        self._sorts = sorts
         return sorts
 
-    @property
+    @memoized_property
     def fields(self) -> list[Field]:
-        if self._fields:
-            return self._fields
-
         regex = r"\[(?P<type>.*)\]=(?P<fields>.*)"
         fields = []
         query_field = self.query_parameters.get("field")
@@ -60,14 +51,10 @@ class RequestContext:
                 type_fields = m.group("fields").split(",")
                 fields.extend([Field(type, type_field) for type_field in type_fields])
 
-        self._fields = fields
         return fields
 
-    @property
-    def page(self) -> Page:
-        if self._page:
-            return self._page
-
+    @memoized_property
+    def page(self) -> Optional[Page]:
         regex = r"\[(?P<param_type>.*)\]=(?P<param_value>.*)"
         query_page = self.query_parameters.get("page")
         if query_page is None:
@@ -89,5 +76,16 @@ class RequestContext:
             page_number = 1
 
         page = Page(self.url, self.query_parameters, page_number, page_size)
-        self._page = page
         return page
+
+    @memoized_property
+    def includes(self) -> list[Include]:
+        includes = []
+        query_include = self.query_parameters.get("include")
+        if query_include is None:
+            return includes
+
+        for include in query_include.split(","):
+            includes.append(Include(field=include))
+
+        return includes

@@ -18,3 +18,5 @@ error_check
 
 pytest
 error_check
+
+echo "🚀 All checks passed."

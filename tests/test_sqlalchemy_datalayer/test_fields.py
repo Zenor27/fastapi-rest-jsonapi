@@ -17,9 +17,9 @@ def test_two_fields(client: TestClient, users, generate_data):
 
 def test_non_existing_field(client: TestClient, users):
     response: Response = client.get("/users?field%5Buser%5D=broken")
-    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_non_existing_type(client: TestClient, users):
     response: Response = client.get("/users?field%5Bfoobar%5D=age")
-    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
