@@ -6,7 +6,13 @@ PAGE_NUMBER_QUERY_PARAM = "page[number]"
 
 
 class Page:
-    def __init__(self, url: URL, query_params: Optional[dict], number: int, size: Optional[int] = None) -> None:
+    def __init__(
+        self,
+        url: URL,
+        query_params: Optional[dict],
+        number: int,
+        size: Optional[int] = None,
+    ) -> None:
         self.url = url
         self.query_params = query_params
         self.number = number
@@ -19,9 +25,18 @@ class Page:
     def __get_query_params_as_dict(self) -> dict:
         if not self.query_params:
             return {}
-        non_iterable_query_params = {k: v for k, v in self.query_params.items() if v and not isinstance(v, list)}
-        iterable_query_params = {k: v for k, v in self.query_params.items() if v and k not in non_iterable_query_params}
-        iterable_query_params = {v.split("=")[0]: v.split("=")[1] for v in chain(*iterable_query_params.values())}
+        non_iterable_query_params = {
+            k: v for k, v in self.query_params.items() if v and not isinstance(v, list)
+        }
+        iterable_query_params = {
+            k: v
+            for k, v in self.query_params.items()
+            if v and k not in non_iterable_query_params
+        }
+        iterable_query_params = {
+            v.split("=")[0]: v.split("=")[1]
+            for v in chain(*iterable_query_params.values())
+        }
         return non_iterable_query_params | iterable_query_params
 
     def get_self_link(self) -> str:

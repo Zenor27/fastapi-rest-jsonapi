@@ -16,6 +16,12 @@ class UnknownRelationshipException(RestAPIException):
         self.message = f"Unknown relationship: {relationship}"
 
 
+class UnprocessableEntityException(RestAPIException):
+    def __init__(self, entity: str):
+        self.status = status.HTTP_422_UNPROCESSABLE_ENTITY
+        self.message = f"Unprocessable entity: {entity}"
+
+
 class UnknownTypeException(RestAPIException):
     def __init__(self, type_: str):
         self.status = status.HTTP_400_BAD_REQUEST

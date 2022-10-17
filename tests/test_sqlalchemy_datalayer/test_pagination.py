@@ -5,7 +5,11 @@ from requests.models import Response
 
 
 def generate_links(
-    current_page_number: int, current_page_size: int, has_prev_page: bool, has_next_page: bool, user_count: int
+    current_page_number: int,
+    current_page_size: int,
+    has_prev_page: bool,
+    has_next_page: bool,
+    user_count: int,
 ) -> dict:
     last_page = ceil(user_count / current_page_size)
     return {
@@ -21,7 +25,9 @@ def generate_links(
     }
 
 
-def test_simple_default_pagination_first_page(client: TestClient, users, generate_data, user_count):
+def test_simple_default_pagination_first_page(
+    client: TestClient, users, generate_data, user_count
+):
     response: Response = client.get("/users?page[number]=1&page[size]=30")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
@@ -30,7 +36,9 @@ def test_simple_default_pagination_first_page(client: TestClient, users, generat
     }
 
 
-def test_simple_default_pagination_second_page(client: TestClient, users, generate_data, user_count):
+def test_simple_default_pagination_second_page(
+    client: TestClient, users, generate_data, user_count
+):
     response: Response = client.get("/users?page[number]=2&page[size]=30")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
@@ -48,4 +56,7 @@ def test_disable_pagination(client: TestClient, users, generate_data):
 def test_wrong_page(client: TestClient, users, generate_data, user_count):
     response: Response = client.get("/users?page[number]=424242&page[size]=30")
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"data": [], "links": generate_links(424242, 30, True, False, user_count)}
+    assert response.json() == {
+        "data": [],
+        "links": generate_links(424242, 30, True, False, user_count),
+    }

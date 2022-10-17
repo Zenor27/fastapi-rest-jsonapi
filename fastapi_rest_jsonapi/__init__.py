@@ -4,4 +4,12 @@ from fastapi_rest_jsonapi.resource import Resource, ResourceDetail, ResourceList
 from fastapi_rest_jsonapi.data import DataLayer, SQLAlchemyDataLayer
 
 
-__all__ = ["RestAPI", "Schema", "Resource", "ResourceList", "ResourceDetail", "DataLayer", "SQLAlchemyDataLayer"]
+__all__ = [
+    "RestAPI",
+    "Schema",
+    "Resource",
+    "ResourceList",
+    "ResourceDetail",
+    "DataLayer",
+    "SQLAlchemyDataLayer",
+]

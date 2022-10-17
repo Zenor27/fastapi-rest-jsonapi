@@ -60,7 +60,9 @@ class RestAPI:
         is_detail_resource_ = is_detail_resource(resource)
         model_suffix = "detail" if is_detail_resource_ else "list"
         # For some reasons, FastAPI does not allow to use the same name for the response model
-        response_model = create_model(f"{schema.__type__}-{method}-{model_suffix}", **fields)
+        response_model = create_model(
+            f"{schema.__type__}-{method}-{model_suffix}", **fields
+        )
         if is_detail_resource_:
             return response_model
         return List[response_model]
@@ -74,9 +76,7 @@ class RestAPI:
     def __get_endpoint_summary(self, resource: Resource, method: str) -> str:
         is_detail_resource_ = is_detail_resource(resource)
         schema_type = resource.schema.__type__
-        return (
-            f"{method} {'a' if is_detail_resource_ else 'multiple'} {schema_type}{'' if is_detail_resource_ else 's'}"
-        )
+        return f"{method} {'a' if is_detail_resource_ else 'multiple'} {schema_type}{'' if is_detail_resource_ else 's'}"
 
     def __get_query_parameters_dict(self, request: Request) -> dict:
         request_query_params_dict = request.query_params._dict
@@ -89,9 +89,16 @@ class RestAPI:
             if request_query_param := request_query_params_dict.get(query_param_name):
                 return request_query_param.split("&")
 
-            return [f"{k}={v}" for k, v in request_query_params_dict.items() if query_param_name in k]
+            return [
+                f"{k}={v}"
+                for k, v in request_query_params_dict.items()
+                if query_param_name in k
+            ]
 
-        return {parameter: __get_query_params_with_brackets(parameter) for parameter in RestAPI.QUERY_PARAMETER_KEYS}
+        return {
+            parameter: __get_query_params_with_brackets(parameter)
+            for parameter in RestAPI.QUERY_PARAMETER_KEYS
+        }
 
     def __override_swagger_doc(self):
         def __generate_field_parameter(field_name: str) -> dict:
@@ -104,10 +111,15 @@ class RestAPI:
 
         openapi = self.app.openapi()
         for resource, resource_url in self.registered_resources:
-            if Methods.GET.value not in resource.methods or is_detail_resource(resource):
+            if Methods.GET.value not in resource.methods or is_detail_resource(
+                resource
+            ):
                 continue
             openapi["paths"][resource_url]["get"]["parameters"] = [
-                *[__generate_field_parameter(field_name) for field_name in RestAPI.QUERY_PARAMETER_KEYS]
+                *[
+                    __generate_field_parameter(field_name)
+                    for field_name in RestAPI.QUERY_PARAMETER_KEYS
+                ]
             ]
 
     def endpoint_wrapper(self, resource: Resource, method: str):
@@ -131,7 +143,9 @@ class RestAPI:
 
             def wrapper(
                 request: Request,
-                path_parameters: self.__get_path_parameters_model(resource, method) = Depends(),
+                path_parameters: self.__get_path_parameters_model(
+                    resource, method
+                ) = Depends(),
                 body: Optional[dict] = Body(default=None),
             ):
                 return endpoint(request, path_parameters, body)
@@ -140,7 +154,9 @@ class RestAPI:
 
             def wrapper(
                 request: Request,
-                path_parameters: self.__get_path_parameters_model(resource, method) = Depends(),
+                path_parameters: self.__get_path_parameters_model(
+                    resource, method
+                ) = Depends(),
             ):
                 return endpoint(request, path_parameters, None)
 

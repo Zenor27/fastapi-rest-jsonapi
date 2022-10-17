@@ -1,4 +1,5 @@
 from math import ceil
+from fastapi_rest_jsonapi.common.exceptions import UnprocessableEntityException
 
 import sqlalchemy
 from fastapi_rest_jsonapi.common.exceptions import (
@@ -30,23 +31,35 @@ class SQLAlchemyDataLayer(DataLayer):
                 return class_
         raise UnknownTypeException(type_)
 
-    def __get_relationships_and_properties_for_model(self, model) -> tuple[list[str], list[str]]:
+    def __get_relationships_and_properties_for_model(
+        self, model
+    ) -> tuple[list[str], list[str]]:
         relationships = []
         properties = []
         for field_name, field_attr in model.__dict__.items():
-            if type(getattr(field_attr, "property", False)) is sqlalchemy.orm.relationships.RelationshipProperty:
+            if (
+                type(getattr(field_attr, "property", False))
+                is sqlalchemy.orm.relationships.RelationshipProperty
+            ):
                 relationships.append(field_name)
             elif type(getattr(field_attr, "property", False)):
                 properties.append(field_name)
 
         return relationships, properties
 
-    def __get_fields_for_type(self, type_: str, fields: list[Field]) -> tuple[list[str], list[str]]:
+    def __get_fields_for_type(
+        self, type_: str, fields: list[Field]
+    ) -> tuple[list[str], list[str]]:
         type_model = self.__get_model_for_type(type_)
-        type_relationship_fields, type_properties_fields = self.__get_relationships_and_properties_for_model(type_model)
+        (
+            type_relationship_fields,
+            type_properties_fields,
+        ) = self.__get_relationships_and_properties_for_model(type_model)
         fields_ = list(filter(lambda f: f.type == type_, fields or []))
         fields_properties = filter(lambda f: f.field in type_properties_fields, fields_)
-        fields_relationships = filter(lambda f: f.field in type_relationship_fields, fields_)
+        fields_relationships = filter(
+            lambda f: f.field in type_relationship_fields, fields_
+        )
         fields_properties = map(lambda f: f.field, fields_properties)
         fields_relationships = map(lambda f: f.field, fields_relationships)
         return list(fields_properties), list(fields_relationships)
@@ -75,10 +88,16 @@ class SQLAlchemyDataLayer(DataLayer):
         page.max_number = ceil(total / page.size)
         return query.offset(page.size * (page.number - 1)).limit(page.size)
 
-    def __include_and_field_query(self, query: Query, includes: list[Include], fields: list[Field]) -> Query:
+    def __include_and_field_query(
+        self, query: Query, includes: list[Include], fields: list[Field]
+    ) -> Query:
         processed_fields = []
-        fields_properties, fields_relationship = self.__get_fields_for_type(self.current_tablename, fields)
-        query = query.options(load_only(*fields_properties)) if fields_properties else query
+        fields_properties, fields_relationship = self.__get_fields_for_type(
+            self.current_tablename, fields
+        )
+        query = (
+            query.options(load_only(*fields_properties)) if fields_properties else query
+        )
         processed_fields.extend(fields_properties)
         processed_fields.extend(fields_relationship)
 
@@ -91,12 +110,18 @@ class SQLAlchemyDataLayer(DataLayer):
                 joined_load_func = joined_load_func.load_only(*fields_)
             query = query.options(joined_load_func)
 
-        if processed_diff := set(processed_fields) ^ set([x.field for x in fields or []]):
+        if processed_diff := set(processed_fields) ^ set(
+            [x.field for x in fields or []]
+        ):
             raise UnknownRelationshipException(", ".join(processed_diff))
         return query
 
     def get(
-        self, sorts: list[Sort] = None, fields: list[Field] = None, page: Page = None, includes: list[Include] = None
+        self,
+        sorts: list[Sort] = None,
+        fields: list[Field] = None,
+        page: Page = None,
+        includes: list[Include] = None,
     ) -> list:
         query: Query = self.session.query(self.model)
         query = self.__include_and_field_query(query, includes, fields)
@@ -104,7 +129,9 @@ class SQLAlchemyDataLayer(DataLayer):
         query = self.__paginate_query(query, page)
         return query.all()
 
-    def get_one(self, id_: int, fields: list[Field] = None, includes: list[Include] = None) -> object:
+    def get_one(
+        self, id_: int, fields: list[Field] = None, includes: list[Include] = None
+    ) -> object:
         query: Query = self.session.query(self.model)
         query = self.__include_and_field_query(query, includes, fields)
         query = query.filter(self.model.id == id_)
@@ -130,5 +157,9 @@ class SQLAlchemyDataLayer(DataLayer):
     def create_one(self, **kwargs) -> object:
         obj = self.model(**kwargs)
         self.session.add(obj)
-        self.session.commit()
-        return obj
+        try:
+            self.session.commit()
+            return obj
+        except Exception:
+            self.session.rollback()
+            raise UnprocessableEntityException(str(kwargs))
