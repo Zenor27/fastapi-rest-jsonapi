@@ -202,7 +202,9 @@ def user_detail(user_schema, session: Session, user_model):
 
 
 @fixture(autouse=True)
-def register_schema_routes(rest_api: RestAPI, user_list, user_detail, article_list, article_detail):
+def register_schema_routes(
+    rest_api: RestAPI, user_list, user_detail, article_list, article_detail
+):
     rest_api.register(user_list, "/users")
     rest_api.register(user_detail, "/users/{id}")
     rest_api.register(article_list, "/articles")
@@ -244,7 +246,9 @@ def authors(session: Session, author_model, comment_count):
 def comments(session: Session, authors, articles, comment_model, comment_count):
     comments = []
     for i in range(comment_count):
-        comment = comment_model(text=f"comment {i}", author_id=authors[i].id, article_id=articles[i // 2].id)
+        comment = comment_model(
+            text=f"comment {i}", author_id=authors[i].id, article_id=articles[i // 2].id
+        )
         comments.append(comment)
         session.add(comment)
     session.commit()
